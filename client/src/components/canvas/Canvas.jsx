@@ -28,7 +28,7 @@ const Canvas = () => {
     const isSelected = selectedWidgetId === widget.id;
     const style = {
       ...widget.style,
-      border: isSelected ? '2px solid #007fd4' : '1px solid transparent',
+      border: isSelected ? '1px solid #007fd4' : '1px solid transparent',
       position: 'relative'
     };
 
@@ -40,7 +40,7 @@ const Canvas = () => {
           e.stopPropagation();
           selectWidget(widget.id);
         }}
-        className={`bg-editor-panel overflow-hidden transition-shadow ${isSelected ? 'shadow-[0_0_0_2px_rgba(0,127,212,0.5)] z-10' : 'hover:border-editor-border z-0'}`}
+        className={`bg-transparent overflow-hidden transition-shadow ${isSelected ? 'shadow-[0_0_0_1px_rgba(0,127,212,0.5)] z-10' : 'hover:border-editor-border hover:shadow-sm z-0'}`}
         style={style}
       >
         {widget.type === 'text' && <TextWidget widget={widget} />}
@@ -48,7 +48,7 @@ const Canvas = () => {
         {widget.type === 'chart' && <ChartWidget widget={widget} />}
         
         {isSelected && (
-          <div className="absolute top-0 right-0 bg-editor-accent text-white text-[10px] px-1 rounded-bl">
+          <div className="absolute top-0 right-0 bg-editor-accent text-white text-xxs px-1.5 py-0.5 rounded-bl shadow-sm pointer-events-none">
             {widget.type}
           </div>
         )}
@@ -58,10 +58,21 @@ const Canvas = () => {
 
   return (
     <div 
-      className="flex-1 h-full overflow-y-auto bg-editor-bg p-8"
+      className="flex-1 h-full overflow-y-auto bg-editor-bg p-6 lg:p-12 flex justify-center custom-scrollbar"
       onClick={() => selectWidget(null)}
     >
-      <div className="min-h-[800px] border border-editor-border/30 rounded-lg shadow-2xl relative" style={{ backgroundImage: 'radial-gradient(#333 1px, transparent 0)', backgroundSize: '20px 20px' }}>
+      <div className="w-full max-w-[1200px] min-h-[800px] bg-editor-panel shadow-2xl relative transition-all duration-300 mx-auto" 
+           style={{ 
+             backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 0)', 
+             backgroundSize: '24px 24px',
+             backgroundPosition: '0 0'
+           }}>
+        
+        {/* Canvas Header / Tab */}
+        <div className="absolute top-0 left-0 -mt-7 bg-editor-panel px-4 py-1.5 rounded-t text-xs text-white font-medium shadow-sm flex items-center gap-2 border-b-2 border-editor-accent">
+          <span>Desktop View</span>
+        </div>
+
         {mounted && (
           <ResponsiveGridLayout
             className="layout"
@@ -73,8 +84,8 @@ const Canvas = () => {
             draggableHandle=".drag-handle"
             isDraggable={true}
             isResizable={true}
-            margin={[10, 10]}
-            containerPadding={[10, 10]}
+            margin={[0, 0]}
+            containerPadding={[0, 0]}
           >
             {widgets.map(renderWidget)}
           </ResponsiveGridLayout>
