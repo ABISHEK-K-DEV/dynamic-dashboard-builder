@@ -1,0 +1,14 @@
+{
+  "name": "dynamic-dashboard-builder",
+  "version": "1.0.0",
+  "description": "Production-quality Dynamic Dashboard Builder",
+  "scripts": {
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npm start",
+    "client": "cd client && npm run dev",
+    "install:all": "npm install && cd client && npm install --legacy-peer-deps && cd ../server && npm install"
+  },
+  "dependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
