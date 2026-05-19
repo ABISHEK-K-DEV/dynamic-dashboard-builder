@@ -67,13 +67,15 @@ exports.saveLayout = async (req, res) => {
           content: w.content
         });
 
-        if (w.position) {
+        if (w.position || w.layouts) {
+          const desktop = w.layouts?.desktop || w.position || {};
           await WidgetPosition.create({
             widgetId: newWidget.id,
-            x: w.position.x || 0,
-            y: w.position.y || 0,
-            w: w.position.w || 4,
-            h: w.position.h || 4
+            x: desktop.x ?? 0,
+            y: desktop.y ?? 0,
+            w: desktop.w ?? 4,
+            h: desktop.h ?? 4,
+            layouts: w.layouts || null,
           });
         }
 

@@ -23,6 +23,12 @@ const Builder = () => {
               : w.type === 'image' && w.content
                 ? getAssetUrl(w.content)
                 : (w.content ?? (w.type === 'text' ? '<p></p>' : ''));
+            const savedLayouts = w.position?.layouts
+              ? typeof w.position.layouts === 'string'
+                ? JSON.parse(w.position.layouts)
+                : w.position.layouts
+              : null;
+
             return {
               id: w.id,
               type: w.type,
@@ -33,6 +39,7 @@ const Builder = () => {
                 w: w.position?.w ?? 4,
                 h: w.position?.h ?? 4,
               },
+              layouts: savedLayouts,
               style: {
                 fontSize: w.style?.fontSize ?? '16px',
                 color: w.style?.color ?? '#ffffff',

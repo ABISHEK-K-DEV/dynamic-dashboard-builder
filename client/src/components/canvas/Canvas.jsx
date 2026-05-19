@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { ResponsiveGridLayout } from 'react-grid-layout';
+import React, { useEffect, useMemo, useState } from 'react';
+import { GridLayout } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 
@@ -7,33 +7,51 @@ import { useDashboard } from '../../context/DashboardContext';
 import TextWidget from '../widgets/TextWidget';
 import ImageWidget from '../widgets/ImageWidget';
 import ChartWidget from '../widgets/ChartWidget';
+import { VIEWPORT_CONFIG, getLayoutForViewport } from '../../utils/responsiveLayout';
 
 const Canvas = () => {
-  const { widgets, selectWidget, selectedWidgetId, updateWidgetPosition, dashboardId, setWidgets, viewport, isPreviewMode } = useDashboard();
+  const {
+    widgets,
+    selectWidget,
+    selectedWidgetId,
+    updateWidgetLayout,
+    viewport,
+    isPreviewMode,
+  } = useDashboard();
   const [mounted, setMounted] = useState(false);
+
+  const config = VIEWPORT_CONFIG[viewport];
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const onLayoutChange = (layout) => {
-    layout.forEach(l => {
-      updateWidgetPosition(l.i, { x: l.x, y: l.y, w: l.w, h: l.h });
+  const layout = useMemo(
+    () =>
+      widgets.map((w) => ({
+        i: w.id,
+        ...getLayoutForViewport(w, viewport),
+      })),
+    [widgets, viewport]
+  );
+
+  const onLayoutChange = (newLayout) => {
+    newLayout.forEach((l) => {
+      updateWidgetLayout(viewport, l.i, { x: l.x, y: l.y, w: l.w, h: l.h });
     });
   };
 
   const renderWidget = (widget) => {
-    const isSelected = !isPreviewMode && (selectedWidgetId === widget.id);
+    const isSelected = !isPreviewMode && selectedWidgetId === widget.id;
     const style = {
       ...widget.style,
       border: isSelected ? '1px solid #007fd4' : '1px solid transparent',
-      position: 'relative'
+      position: 'relative',
     };
 
     return (
-      <div 
-        key={widget.id} 
-        data-grid={{ i: widget.id, x: widget.position.x, y: widget.position.y, w: widget.position.w, h: widget.position.h }}
+      <div
+        key={widget.id}
         onClick={(e) => {
           e.stopPropagation();
           selectWidget(widget.id);
@@ -44,7 +62,7 @@ const Canvas = () => {
         {widget.type === 'text' && <TextWidget widget={widget} />}
         {widget.type === 'image' && <ImageWidget widget={widget} />}
         {widget.type === 'chart' && <ChartWidget widget={widget} />}
-        
+
         {isSelected && !isPreviewMode && (
           <div className="absolute top-0 right-0 bg-editor-accent text-white text-xxs px-1.5 py-0.5 rounded-bl shadow-sm pointer-events-none">
             {widget.type}
@@ -54,49 +72,54 @@ const Canvas = () => {
     );
   };
 
-  const containerWidth = viewport === 'desktop' ? '1200px' : viewport === 'tablet' ? '768px' : '375px';
-  const label = viewport === 'desktop' ? 'Desktop View' : viewport === 'tablet' ? 'Tablet View' : 'Mobile View';
-
-  const bgStyle = isPreviewMode ? {} : {
-    backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 0)', 
-    backgroundSize: '24px 24px',
-    backgroundPosition: '0 0'
-  };
+  const bgStyle = isPreviewMode
+    ? {}
+    : {
+        backgroundImage:
+          'radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 0)',
+        backgroundSize: '24px 24px',
+        backgroundPosition: '0 0',
+      };
 
   return (
-    <div 
-      className="flex-1 h-full overflow-y-auto bg-editor-bg p-6 lg:p-12 flex justify-center custom-scrollbar"
+    <div
+      className="flex-1 h-full overflow-y-auto overflow-x-hidden bg-editor-bg p-4 sm:p-6 lg:p-12 flex justify-center custom-scrollbar"
       onClick={() => selectWidget(null)}
     >
-      <div className="w-full min-h-[800px] bg-editor-panel shadow-2xl relative transition-all duration-300 mx-auto" 
-           style={{ 
-             maxWidth: containerWidth,
-             ...bgStyle
-           }}>
-        
-        {/* Canvas Header / Tab */}
+      <div
+        className="w-full min-h-[800px] bg-editor-panel shadow-2xl relative transition-all duration-300 mx-auto shrink-0"
+        style={{
+          width: '100%',
+          maxWidth: config.width,
+          ...bgStyle,
+        }}
+      >
         {!isPreviewMode && (
           <div className="absolute top-0 left-0 -mt-7 bg-editor-panel px-4 py-1.5 rounded-t text-xs text-white font-medium shadow-sm flex items-center gap-2 border-b-2 border-editor-accent">
-            <span>{label}</span>
+            <span>{config.label}</span>
+            <span className="text-editor-text font-normal">{config.width}px</span>
           </div>
         )}
 
         {mounted && (
-          <ResponsiveGridLayout
+          <GridLayout
+            key={viewport}
             className="layout"
-            layouts={{ lg: widgets.map(w => ({ i: w.id, ...w.position })) }}
-            breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-            cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
+            width={config.width}
+            cols={config.cols}
+            layout={layout}
             rowHeight={30}
             onLayoutChange={onLayoutChange}
             draggableHandle=".drag-handle"
             isDraggable={!isPreviewMode}
             isResizable={!isPreviewMode}
-            margin={[0, 0]}
-            containerPadding={[0, 0]}
+            margin={[8, 8]}
+            containerPadding={[8, 8]}
+            compactType="vertical"
+            preventCollision={false}
           >
             {widgets.map(renderWidget)}
-          </ResponsiveGridLayout>
+          </GridLayout>
         )}
       </div>
     </div>

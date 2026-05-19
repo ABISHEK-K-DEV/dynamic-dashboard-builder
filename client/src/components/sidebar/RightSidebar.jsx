@@ -3,7 +3,7 @@ import { useDashboard } from '../../context/DashboardContext';
 import { Trash2, Copy, Settings, Zap, Palette, AlignLeft, AlignCenter, AlignRight, AlignJustify, Type } from 'lucide-react';
 
 const RightSidebar = () => {
-  const { getSelectedWidget, updateWidgetStyle, updateWidgetPosition, removeWidget, duplicateWidget } = useDashboard();
+  const { getSelectedWidget, updateWidgetStyle, updateWidgetPosition, removeWidget, duplicateWidget, viewport } = useDashboard();
   const widget = getSelectedWidget();
   const [activeTab, setActiveTab] = useState('style');
 
@@ -85,6 +85,7 @@ const RightSidebar = () => {
         <div className="border-t border-editor-border pt-4">
           <div className="flex justify-between items-center mb-3 text-white">
             <span className="text-xs font-semibold">Layout</span>
+            <span className="text-xxs text-editor-accent capitalize">{viewport}</span>
           </div>
           <div className="grid grid-cols-2 gap-2 mb-3">
             <div className="flex flex-col">

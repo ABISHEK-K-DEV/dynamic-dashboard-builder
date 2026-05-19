@@ -17,6 +17,10 @@ const WidgetPosition = sequelize.define('WidgetPosition', {
   y: { type: DataTypes.INTEGER, defaultValue: 0 },
   w: { type: DataTypes.INTEGER, defaultValue: 4 },
   h: { type: DataTypes.INTEGER, defaultValue: 4 },
+  layouts: {
+    type: DataTypes.JSON,
+    allowNull: true,
+  },
 }, {
   tableName: 'widget_positions',
   underscored: true,
