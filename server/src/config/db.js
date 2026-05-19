@@ -3,10 +3,12 @@ require('dotenv').config();
 
 function getSslDialectOptions() {
   if (process.env.DB_SSL !== 'true') return {};
+  // Railway / PlanetScale public URLs use certs that fail strict verification
+  const strictSsl = process.env.DB_SSL_REJECT_UNAUTHORIZED === 'true';
   return {
     ssl: {
       require: true,
-      rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false',
+      rejectUnauthorized: strictSsl,
     },
   };
 }
