@@ -4,10 +4,10 @@ import RightSidebar from '../components/sidebar/RightSidebar';
 import Toolbar from '../components/toolbar/Toolbar';
 import Canvas from '../components/canvas/Canvas';
 import { useDashboard } from '../context/DashboardContext';
-import { dashboardService } from '../services/api';
+import { dashboardService, getAssetUrl } from '../services/api';
 
 const Builder = () => {
-  const { dashboardId, setWidgets } = useDashboard();
+  const { dashboardId, setWidgets, isPreviewMode } = useDashboard();
 
   useEffect(() => {
     const fetchDashboard = async () => {
@@ -16,25 +16,33 @@ const Builder = () => {
         
         // Transform backend data to frontend widget state
         if (data.widgets) {
-          const transformedWidgets = data.widgets.map(w => ({
-            id: w.id,
-            type: w.type,
-            content: w.content,
-            position: {
-              x: w.position ? w.position.x : 0,
-              y: w.position ? w.position.y : 0,
-              w: w.position ? w.position.w : 4,
-              h: w.position ? w.position.h : 4,
-            },
-            style: {
-              fontSize: w.style ? w.style.fontSize : '16px',
-              color: w.style ? w.style.color : '#ffffff',
-              background: w.style ? w.style.background : 'transparent',
-              borderRadius: w.style ? w.style.borderRadius : '0px',
-              opacity: w.style ? parseFloat(w.style.opacity) : 1,
-              align: w.style ? w.style.align : 'left',
-            }
-          }));
+          const transformedWidgets = data.widgets.map(w => {
+            const opacity = w.style?.opacity != null ? parseFloat(w.style.opacity) : 1;
+            const chartContent = w.type === 'chart'
+              ? (['bar', 'line', 'pie'].includes(w.content) ? w.content : 'bar')
+              : w.type === 'image' && w.content
+                ? getAssetUrl(w.content)
+                : (w.content ?? (w.type === 'text' ? '<p></p>' : ''));
+            return {
+              id: w.id,
+              type: w.type,
+              content: chartContent,
+              position: {
+                x: w.position?.x ?? 0,
+                y: w.position?.y ?? 0,
+                w: w.position?.w ?? 4,
+                h: w.position?.h ?? 4,
+              },
+              style: {
+                fontSize: w.style?.fontSize ?? '16px',
+                color: w.style?.color ?? '#ffffff',
+                background: w.style?.background ?? 'transparent',
+                borderRadius: w.style?.borderRadius ?? '0px',
+                opacity: Number.isFinite(opacity) ? opacity : 1,
+                align: w.style?.align ?? 'left',
+              },
+            };
+          });
           setWidgets(transformedWidgets);
         }
       } catch (error) {
@@ -49,9 +57,9 @@ const Builder = () => {
     <div className="flex flex-col h-screen w-screen overflow-hidden bg-editor-bg">
       <Toolbar />
       <div className="flex flex-1 overflow-hidden">
-        <LeftSidebar />
+        {!isPreviewMode && <LeftSidebar />}
         <Canvas />
-        <RightSidebar />
+        {!isPreviewMode && <RightSidebar />}
       </div>
     </div>
   );

@@ -1,0 +1,35 @@
+# Render Blueprint — backend API (+ optional MySQL from Render dashboard)
+# Frontend: deploy separately on Vercel (recommended) or use the static service below.
+
+services:
+  - type: web
+    name: dashboard-api
+    runtime: node
+    rootDir: server
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SYNC_DB
+        value: "true"
+      - key: SEED_DASHBOARD
+        value: "true"
+      - key: CORS_ORIGINS
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: DB_SSL
+        value: "true"
+
+  - type: web
+    name: dashboard-web
+    runtime: static
+    rootDir: client
+    buildCommand: npm install --legacy-peer-deps && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        sync: false

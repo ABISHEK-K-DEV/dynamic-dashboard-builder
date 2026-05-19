@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useDashboard } from '../../context/DashboardContext';
-import { dashboardService } from '../../services/api';
+import { dashboardService, getAssetUrl } from '../../services/api';
 import { UploadCloud, Move } from 'lucide-react';
 
 const ImageWidget = ({ widget }) => {
-  const { updateWidget, selectedWidgetId } = useDashboard();
+  const { updateWidget, selectedWidgetId, isPreviewMode } = useDashboard();
   const [uploading, setUploading] = useState(false);
   const isSelected = selectedWidgetId === widget.id;
 
@@ -15,7 +15,7 @@ const ImageWidget = ({ widget }) => {
     setUploading(true);
     try {
       const { url } = await dashboardService.uploadImage(file);
-      updateWidget(widget.id, { content: `http://localhost:5000${url}` });
+      updateWidget(widget.id, { content: url });
     } catch (error) {
       console.error('Upload failed', error);
       alert('Upload failed');
@@ -26,14 +26,16 @@ const ImageWidget = ({ widget }) => {
 
   return (
     <div className="w-full h-full flex flex-col group">
-      <div className={`drag-handle absolute top-0 left-0 right-0 h-6 bg-black/50 z-10 flex items-center justify-center cursor-move opacity-0 group-hover:opacity-100 transition-opacity ${isSelected ? 'opacity-100' : ''}`}>
-        <Move size={14} className="text-white" />
-      </div>
+      {!isPreviewMode && (
+        <div className={`drag-handle absolute top-0 left-0 right-0 h-6 bg-black/50 z-10 flex items-center justify-center cursor-move opacity-0 group-hover:opacity-100 transition-opacity ${isSelected ? 'opacity-100' : ''}`}>
+          <Move size={14} className="text-white" />
+        </div>
+      )}
       
       {widget.content ? (
         <div className="w-full h-full flex items-center justify-center overflow-hidden">
           <img 
-            src={widget.content} 
+            src={getAssetUrl(widget.content)} 
             alt="Widget" 
             className="max-w-full max-h-full object-contain"
             style={{ borderRadius: widget.style.borderRadius }}

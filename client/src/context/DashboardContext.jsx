@@ -10,12 +10,14 @@ export const DashboardProvider = ({ children }) => {
   const [selectedWidgetId, setSelectedWidgetId] = useState(null);
   const [dashboardId, setDashboardId] = useState('d1'); // Default to d1 for demo
   const [isSaving, setIsSaving] = useState(false);
+  const [viewport, setViewport] = useState('desktop'); // desktop, tablet, mobile
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
 
   const addWidget = useCallback((type) => {
     const newWidget = {
       id: uuidv4(),
       type,
-      content: type === 'text' ? '<p>New Text Widget</p>' : type === 'image' ? '' : '[]',
+      content: type === 'text' ? '<p>New Text Widget</p>' : type === 'image' ? '' : 'bar',
       position: { x: 0, y: 0, w: 4, h: 4 },
       style: {
         fontSize: '16px',
@@ -44,9 +46,15 @@ export const DashboardProvider = ({ children }) => {
   }, []);
 
   const updateWidgetPosition = useCallback((id, positionUpdates) => {
+    const sanitized = Object.fromEntries(
+      Object.entries(positionUpdates).map(([key, val]) => {
+        const num = Number(val);
+        return [key, Number.isFinite(num) ? num : 0];
+      })
+    );
     setWidgets((prev) => prev.map(w => {
       if (w.id === id) {
-        return { ...w, position: { ...w.position, ...positionUpdates } };
+        return { ...w, position: { x: 0, y: 0, w: 4, h: 4, ...w.position, ...sanitized } };
       }
       return w;
     }));
@@ -99,7 +107,11 @@ export const DashboardProvider = ({ children }) => {
         duplicateWidget,
         getSelectedWidget,
         isSaving,
-        setIsSaving
+        setIsSaving,
+        viewport,
+        setViewport,
+        isPreviewMode,
+        setIsPreviewMode
       }}
     >
       {children}

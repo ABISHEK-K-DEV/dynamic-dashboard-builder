@@ -1,6 +1,21 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
+function resolveApiBase() {
+  const fromEnv = import.meta.env.VITE_API_BASE_URL?.trim().replace(/\/$/, '');
+  if (fromEnv) return fromEnv;
+  if (import.meta.env.DEV) return 'http://localhost:5000';
+  return '';
+}
+
+export const API_BASE = resolveApiBase();
+const API_URL = API_BASE ? `${API_BASE}/api` : '/api';
+
+export const getAssetUrl = (path) => {
+  if (!path) return '';
+  if (path.startsWith('http://') || path.startsWith('https://')) return path;
+  if (!API_BASE) return path;
+  return `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`;
+};
 
 export const api = axios.create({
   baseURL: API_URL,
@@ -22,5 +37,5 @@ export const dashboardService = {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
-  }
+  },
 };

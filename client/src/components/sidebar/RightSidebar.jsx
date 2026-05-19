@@ -15,16 +15,30 @@ const RightSidebar = () => {
     );
   }
 
-  const { style, position } = widget;
+  const position = widget.position ?? { x: 0, y: 0, w: 4, h: 4 };
+  const style = widget.style ?? {
+    fontSize: '16px',
+    color: '#ffffff',
+    background: 'transparent',
+    borderRadius: '0px',
+    opacity: 1,
+    align: 'left',
+  };
+  const opacityValue = Number(style.opacity);
+  const safeOpacity = Number.isFinite(opacityValue) ? opacityValue : 1;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    updateWidgetStyle(widget.id, { [name]: value });
+    const updates = name === 'opacity'
+      ? { [name]: parseFloat(value) }
+      : { [name]: value };
+    updateWidgetStyle(widget.id, updates);
   };
 
   const handlePositionChange = (e) => {
     const { name, value } = e.target;
-    updateWidgetPosition(widget.id, { [name]: parseInt(value) || 0 });
+    const parsed = parseInt(value, 10);
+    updateWidgetPosition(widget.id, { [name]: Number.isFinite(parsed) ? parsed : 0 });
   };
 
   return (
@@ -75,19 +89,19 @@ const RightSidebar = () => {
           <div className="grid grid-cols-2 gap-2 mb-3">
             <div className="flex flex-col">
               <label className="text-xxs text-editor-text mb-1">Position X</label>
-              <input type="number" name="x" value={position.x} onChange={handlePositionChange} className="bg-editor-bg border border-editor-border rounded px-2 py-1 text-xs text-white outline-none focus:border-editor-accent" />
+              <input type="number" name="x" value={position.x ?? 0} onChange={handlePositionChange} className="bg-editor-bg border border-editor-border rounded px-2 py-1 text-xs text-white outline-none focus:border-editor-accent" />
             </div>
             <div className="flex flex-col">
               <label className="text-xxs text-editor-text mb-1">Position Y</label>
-              <input type="number" name="y" value={position.y} onChange={handlePositionChange} className="bg-editor-bg border border-editor-border rounded px-2 py-1 text-xs text-white outline-none focus:border-editor-accent" />
+              <input type="number" name="y" value={position.y ?? 0} onChange={handlePositionChange} className="bg-editor-bg border border-editor-border rounded px-2 py-1 text-xs text-white outline-none focus:border-editor-accent" />
             </div>
             <div className="flex flex-col">
               <label className="text-xxs text-editor-text mb-1">Width (Cols)</label>
-              <input type="number" name="w" value={position.w} onChange={handlePositionChange} className="bg-editor-bg border border-editor-border rounded px-2 py-1 text-xs text-white outline-none focus:border-editor-accent" />
+              <input type="number" name="w" value={position.w ?? 4} onChange={handlePositionChange} className="bg-editor-bg border border-editor-border rounded px-2 py-1 text-xs text-white outline-none focus:border-editor-accent" />
             </div>
             <div className="flex flex-col">
               <label className="text-xxs text-editor-text mb-1">Height (Rows)</label>
-              <input type="number" name="h" value={position.h} onChange={handlePositionChange} className="bg-editor-bg border border-editor-border rounded px-2 py-1 text-xs text-white outline-none focus:border-editor-accent" />
+              <input type="number" name="h" value={position.h ?? 4} onChange={handlePositionChange} className="bg-editor-bg border border-editor-border rounded px-2 py-1 text-xs text-white outline-none focus:border-editor-accent" />
             </div>
           </div>
         </div>
@@ -146,13 +160,13 @@ const RightSidebar = () => {
               <span className="text-xxs text-editor-text w-12">Color</span>
               <div className="flex-1 flex gap-2">
                 <input type="color" name="background" value={style.background === 'transparent' ? '#000000' : style.background} onChange={handleChange} className="w-8 h-6 bg-transparent border-none cursor-pointer p-0" />
-                <input type="text" name="background" value={style.background} onChange={handleChange} className="flex-1 bg-editor-bg border border-editor-border rounded px-2 py-1 text-xs text-white outline-none focus:border-editor-accent placeholder-editor-text" placeholder="transparent" />
+                <input type="text" name="background" value={style.background || ''} onChange={handleChange} className="flex-1 bg-editor-bg border border-editor-border rounded px-2 py-1 text-xs text-white outline-none focus:border-editor-accent placeholder-editor-text" placeholder="transparent" />
               </div>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-xxs text-editor-text w-12">Opacity</span>
-              <input type="range" min="0" max="1" step="0.1" name="opacity" value={style.opacity !== undefined ? style.opacity : 1} onChange={handleChange} className="flex-1 accent-editor-accent" />
-              <span className="text-xxs text-editor-text w-6 text-right">{Math.round((style.opacity !== undefined ? style.opacity : 1) * 100)}%</span>
+              <input type="range" min="0" max="1" step="0.1" name="opacity" value={safeOpacity} onChange={handleChange} className="flex-1 accent-editor-accent" />
+              <span className="text-xxs text-editor-text w-6 text-right">{Math.round(safeOpacity * 100)}%</span>
             </div>
           </div>
         </div>

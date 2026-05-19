@@ -13,7 +13,7 @@
 }
 
 .ql-container {
-  @apply border-editor-border text-editor-text !important;
+  @apply border-transparent text-editor-text !important;
 }
 
 .ql-editor {

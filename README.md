@@ -1,52 +1,73 @@
 # Dynamic Dashboard Builder
 
-A production-quality drag-and-drop dashboard/page builder inspired by Figma, Canva, and Webflow editors.
+A drag-and-drop dashboard/page builder inspired by Figma, Canva, and Webflow editors.
 
 ## Tech Stack
-- **Frontend**: React.js, Vite, Tailwind CSS, React Grid Layout, React Quill, Recharts
-- **Backend**: Node.js, Express.js, MySQL, Sequelize ORM
+
+- **Frontend:** React, Vite, Tailwind CSS, React Grid Layout, React Quill, Recharts
+- **Backend:** Node.js, Express, MySQL, Sequelize
 
 ## Features
-- Drag and drop widgets (Text, Image, Chart)
-- Rich text editing
-- Image uploading and previews
-- Dynamic charts (Bar, Line, Pie)
-- Customizable widget properties (Opacity, Background, Typography, etc.)
-- Auto-saving layouts with MySQL persistence
 
-## Setup Instructions
+- Drag, resize, and arrange widgets (text, image, charts)
+- Rich text editing (bold, italic, font size)
+- Image upload and chart widgets (bar / line / pie)
+- Save and restore layouts from MySQL
 
-1. **Clone the repository**
-   ```bash
-   git clone <repo-url>
-   cd dynamic-dashboard-builder
-   ```
+## Local setup
 
-2. **Install dependencies**
-   Install all dependencies for root, client, and server:
+1. **Install dependencies**
+
    ```bash
    npm run install:all
    ```
 
-3. **Database Setup**
-   - Make sure MySQL is running locally.
-   - Run the provided `schema.sql` file to create the database and tables, and insert initial data.
-   - Example command: `mysql -u root -p < schema.sql`
+   Dependencies are installed only in `client/` and `server/` (no root `node_modules`).
 
-4. **Environment Variables**
-   - Navigate to the `server` directory and rename `.env.example` to `.env`.
-   - Adjust the database credentials if necessary.
+2. **Database**
 
-5. **Run the Application**
-   From the root directory, run both frontend and backend concurrently:
+   ```bash
+   mysql -u root -p < schema.sql
+   ```
+
+3. **Environment**
+
+   ```bash
+   cp server/.env.example server/.env
+   cp client/.env.example client/.env
+   ```
+
+   Edit `server/.env` with your MySQL credentials.
+
+4. **Run**
+
    ```bash
    npm start
    ```
 
-   - Frontend runs on `http://localhost:5173`
-   - Backend runs on `http://localhost:5000`
+   - Frontend: http://localhost:5173  
+   - API: http://localhost:5000  
 
-## Project Structure
-- `/client`: React Vite frontend
-- `/server`: Express Node backend
-- `schema.sql`: MySQL schema setup
+## Deployment (Vercel + Railway / Render)
+
+| Service | Platform |
+|---------|----------|
+| React app | **Vercel** |
+| Express API + MySQL | **Railway** or **Render** |
+
+Full step-by-step instructions: **[DEPLOYMENT.md](./DEPLOYMENT.md)**
+
+**Production env (minimum):**
+
+- **Vercel:** `VITE_API_BASE_URL=https://your-api.example.com`
+- **Railway/Render API:** `DATABASE_URL`, `CORS_ORIGINS=https://your-app.vercel.app`, `NODE_ENV=production`
+
+## Project structure
+
+```
+client/          React frontend (deploy to Vercel)
+server/          Express API (deploy to Railway or Render)
+schema.sql       MySQL schema + seed data
+render.yaml      Render blueprint
+vercel.json      Vercel build config (monorepo root)
+```

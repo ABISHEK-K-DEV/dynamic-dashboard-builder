@@ -1,24 +1,30 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 import { useDashboard } from '../../context/DashboardContext';
-import { Move, Settings } from 'lucide-react';
+import { Move } from 'lucide-react';
 
-const data = [
-  { name: 'Jan', value: 400 },
-  { name: 'Feb', value: 300 },
-  { name: 'Mar', value: 600 },
-  { name: 'Apr', value: 800 },
-  { name: 'May', value: 500 },
-];
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May'];
+
+function generateChartData(seed) {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = (hash << 5) - hash + seed.charCodeAt(i);
+    hash |= 0;
+  }
+  return MONTHS.map((name, i) => {
+    const value = 200 + Math.abs((hash + i * 97) % 700);
+    return { name, value };
+  });
+}
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
 const ChartWidget = ({ widget }) => {
-  const { updateWidget, selectedWidgetId } = useDashboard();
+  const { updateWidget, selectedWidgetId, isPreviewMode } = useDashboard();
   const isSelected = selectedWidgetId === widget.id;
 
-  // Let's use content to store chart type (bar, line, pie)
-  const chartType = widget.content || 'bar';
+  const chartType = ['bar', 'line', 'pie'].includes(widget.content) ? widget.content : 'bar';
+  const data = useMemo(() => generateChartData(widget.id), [widget.id]);
 
   const setChartType = (type) => {
     updateWidget(widget.id, { content: type });
@@ -78,14 +84,16 @@ const ChartWidget = ({ widget }) => {
 
   return (
     <div className="w-full h-full flex flex-col group relative">
-      <div className={`drag-handle absolute top-0 left-0 right-0 h-6 bg-black/50 z-10 flex items-center justify-between px-2 cursor-move opacity-0 group-hover:opacity-100 transition-opacity ${isSelected ? 'opacity-100' : ''}`}>
-        <Move size={14} className="text-white" />
-        <div className="flex gap-1">
-          <button onClick={(e) => { e.stopPropagation(); setChartType('bar'); }} className={`text-[10px] px-1 rounded ${chartType === 'bar' ? 'bg-editor-accent text-white' : 'bg-gray-700 text-gray-300'}`}>Bar</button>
-          <button onClick={(e) => { e.stopPropagation(); setChartType('line'); }} className={`text-[10px] px-1 rounded ${chartType === 'line' ? 'bg-editor-accent text-white' : 'bg-gray-700 text-gray-300'}`}>Line</button>
-          <button onClick={(e) => { e.stopPropagation(); setChartType('pie'); }} className={`text-[10px] px-1 rounded ${chartType === 'pie' ? 'bg-editor-accent text-white' : 'bg-gray-700 text-gray-300'}`}>Pie</button>
+      {!isPreviewMode && (
+        <div className={`drag-handle absolute top-0 left-0 right-0 h-6 bg-black/50 z-10 flex items-center justify-between px-2 cursor-move opacity-0 group-hover:opacity-100 transition-opacity ${isSelected ? 'opacity-100' : ''}`}>
+          <Move size={14} className="text-white" />
+          <div className="flex gap-1">
+            <button onClick={(e) => { e.stopPropagation(); setChartType('bar'); }} className={`text-[10px] px-1 rounded ${chartType === 'bar' ? 'bg-editor-accent text-white' : 'bg-gray-700 text-gray-300'}`}>Bar</button>
+            <button onClick={(e) => { e.stopPropagation(); setChartType('line'); }} className={`text-[10px] px-1 rounded ${chartType === 'line' ? 'bg-editor-accent text-white' : 'bg-gray-700 text-gray-300'}`}>Line</button>
+            <button onClick={(e) => { e.stopPropagation(); setChartType('pie'); }} className={`text-[10px] px-1 rounded ${chartType === 'pie' ? 'bg-editor-accent text-white' : 'bg-gray-700 text-gray-300'}`}>Pie</button>
+          </div>
         </div>
-      </div>
+      )}
       
       <div className="flex-1 w-full h-full pt-6 pb-2 px-2">
         {renderChart()}

@@ -149,6 +149,7 @@ exports.uploadImage = async (req, res) => {
     const imageUrl = `/uploads/${req.file.filename}`;
     res.json({ url: imageUrl });
   } catch (error) {
+    console.error('Error uploading image:', error);
     res.status(500).json({ error: 'Failed to upload image' });
   }
 };
