@@ -1,40 +1,68 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-canvas-bg: #f7f5f1;
+  --color-panel-bg: #1a1a1c;
+  --color-panel-border: #2a2a2d;
+  --color-panel-fg: #e7e7ea;
+  --color-panel-muted: #8c8c92;
+  --color-accent: #6c8eff;
+  --color-accent-fg: #ffffff;
+  --color-danger: #ef4444;
+  --color-success: #10b981;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, "Cascadia Mono", monospace;
+}
 
 @layer base {
+  html, body, #root {
+    height: 100%;
+    overflow: hidden;
+  }
+
   body {
-    @apply bg-editor-bg text-editor-text m-0 p-0 overflow-hidden font-sans;
+    margin: 0;
+    color: var(--color-panel-fg);
+    background: var(--color-panel-bg);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
-.ql-toolbar {
-  @apply bg-editor-panel border-editor-border !important;
+/* Editor canvas conventions */
+.el {
+  position: absolute;
+  left: var(--x, 0);
+  top: var(--y, 0);
+  width: var(--w, auto);
+  height: var(--h, auto);
+  transform: rotate(var(--rot, 0deg));
+  transform-origin: center center;
 }
 
-.ql-container {
-  @apply border-transparent text-editor-text !important;
+/* Selection outlines drawn by Moveable; we keep our own light hover indicator */
+.el[data-hovered="true"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  outline: 1px solid var(--color-accent);
+  outline-offset: 0;
+  pointer-events: none;
 }
 
-.ql-editor {
-  @apply min-h-[100px];
+/* Hover-effect wrapper (mirrors the exported runtime so the editor preview matches) */
+.sb-hov { display: block; width: 100%; height: 100%; transition: transform var(--hov-dur, 250ms) ease; }
+.sb-hov:hover { transform: scale(var(--hov-scale, 1)) translate(var(--hov-tx, 0), var(--hov-ty, 0)); z-index: 10; }
+
+/* Hide native moveable handles when not editing */
+[data-edit-mode="preview"] .moveable-control-box {
+  display: none !important;
 }
 
-/* Custom scrollbar for webkit */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: #1e1e1e;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #424242;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #4f4f4f;
-}
+/* Scrollbar minimal */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.16); }

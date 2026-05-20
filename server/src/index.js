@@ -6,6 +6,7 @@ const dashboardRoutes = require('./routes/dashboardRoutes');
 const { UPLOADS_DIR, ensureUploadsDir } = require('./config/uploads');
 const { getCorsOptions } = require('./config/cors');
 const { ensureDefaultDashboard } = require('./utils/bootstrap');
+const { runMigrations } = require('./utils/migrations');
 require('dotenv').config();
 
 const app = express();
@@ -37,6 +38,8 @@ async function start() {
       await db.sync();
       console.log('Database synced');
     }
+
+    await runMigrations(db);
 
     if (process.env.SEED_DASHBOARD !== 'false') {
       await ensureDefaultDashboard();

@@ -11,6 +11,11 @@ const Dashboard = sequelize.define('Dashboard', {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  projectData: {
+    type: DataTypes.JSON,
+    allowNull: true,
+    field: 'project_data',
+  },
 }, {
   tableName: 'dashboards',
   underscored: true,

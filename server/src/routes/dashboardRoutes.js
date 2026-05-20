@@ -29,6 +29,8 @@ const upload = multer({
 
 router.post('/dashboards', dashboardController.createDashboard);
 router.get('/dashboards/:id', dashboardController.getDashboard);
+router.get('/dashboards/:id/project', dashboardController.getProject);
+router.put('/dashboards/:id/project', dashboardController.saveProject);
 router.put('/dashboards/:id/layout', dashboardController.saveLayout);
 
 router.put('/widgets/:id', dashboardController.updateWidget);

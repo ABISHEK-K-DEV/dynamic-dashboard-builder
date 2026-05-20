@@ -1,19 +1,22 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Builder from './pages/Builder';
-import { DashboardProvider } from './context/DashboardContext';
+import { useState } from 'react';
+import { EditorShell } from './editor/EditorShell';
+import { ProjectsList } from './editor/ProjectsList';
+import { useEditorStore } from './store/editorStore';
 
-function App() {
-  return (
-    <DashboardProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Builder />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Router>
-    </DashboardProvider>
-  );
+export function App() {
+  const [view, setView] = useState('projects');
+  const setSelection = useEditorStore((s) => s.setSelection);
+
+  if (view === 'projects') {
+    return (
+      <ProjectsList
+        onOpened={() => {
+          setSelection([]);
+          setView('editor');
+        }}
+      />
+    );
+  }
+
+  return <EditorShell onBackToProjects={() => setView('projects')} />;
 }
-
-export default App;
