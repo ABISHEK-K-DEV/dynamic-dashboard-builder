@@ -88,7 +88,9 @@ function ElementRendererImpl({ elementId, bp }) {
         ? editing
           ? (patch) => updateElement(element.id, patch)
           : undefined
-        : (patch) => updateElement(element.id, patch);
+        : element.type === 'chart'
+          ? undefined
+          : (patch) => updateElement(element.id, patch);
 
   const child = (
     <Editor

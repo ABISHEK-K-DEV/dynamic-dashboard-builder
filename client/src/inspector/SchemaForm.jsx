@@ -6,6 +6,8 @@ import { SelectField } from './fields/SelectField';
 import { BooleanField } from './fields/BooleanField';
 import { AssetField } from './fields/AssetField';
 import { FontField } from './fields/FontField';
+import { ChartDataField } from './fields/ChartDataField';
+import { ActionField } from './fields/ActionField';
 export function SchemaForm({ schema, values, onChange }) {
   return (
     <div className="space-y-3">
@@ -78,6 +80,22 @@ function Field({ fieldKey, field, value, onChange }) {
           label={field.label}
           value={value ?? 'system-ui, sans-serif'}
           onChange={(v) => onChange(fieldKey, v)}
+        />
+      );
+    case 'chartData':
+      return (
+        <ChartDataField
+          label={field.label}
+          value={value}
+          onChange={(v) => onChange(fieldKey, v)}
+        />
+      );
+    case 'action':
+      return (
+        <ActionField
+          label={field.label}
+          buttonLabel={field.buttonLabel ?? 'Apply'}
+          onClick={() => onChange(fieldKey, true)}
         />
       );
     case 'group': {

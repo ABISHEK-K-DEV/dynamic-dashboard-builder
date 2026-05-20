@@ -13,17 +13,7 @@ import {
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May'];
 
-function ChartTooltip({ active, payload }) {
-  if (!active || !payload?.length) return null;
-  const row = payload[0].payload;
-  return (
-    <div className="rounded border border-neutral-200 bg-white px-2 py-1 text-xs shadow">
-      <span className="font-medium">{row.name}</span>: {row.value}
-    </div>
-  );
-}
-
-function generateChartData(seed) {
+export function generateChartData(seed) {
   let hash = 0;
   for (let i = 0; i < seed.length; i++) {
     hash = (hash << 5) - hash + seed.charCodeAt(i);
@@ -35,20 +25,27 @@ function generateChartData(seed) {
   }));
 }
 
-function ChartEditor({ element, onEdit }) {
-  const [seed, setSeed] = useState(element.seed ?? 'chart-default');
+function ChartTooltip({ active, payload }) {
+  if (!active || !payload?.length) return null;
+  const row = payload[0].payload;
+  return (
+    <div className="rounded border border-neutral-300 bg-white px-2 py-1 text-xs text-neutral-900 shadow">
+      <span className="font-semibold">{row.name}</span>: {row.value}
+    </div>
+  );
+}
 
-  useLayoutEffect(() => {
-    setSeed(element.seed ?? 'chart-default');
-  }, [element.seed]);
+function ChartEditor({ element }) {
   const chartWrapRef = useRef(null);
-  const [chartSize, setChartSize] = useState({ width: 320, height: 160 });
-  const data = useMemo(() => generateChartData(seed), [seed]);
-  const type = element.chartType ?? 'bar';
+  const [chartSize, setChartSize] = useState({ width: 320, height: 180 });
 
-  const geom = element.geometry?.base ?? {};
-  const boxW = geom.w ?? 360;
-  const boxH = geom.h ?? 220;
+  const data = useMemo(() => {
+    if (element.chartData?.length) return element.chartData;
+    return generateChartData(element.seed ?? 'chart-default');
+  }, [element.chartData, element.seed]);
+
+  const type = element.chartType ?? 'bar';
+  const boxH = element.geometry?.base?.h ?? 220;
 
   useLayoutEffect(() => {
     const el = chartWrapRef.current;
@@ -63,59 +60,39 @@ function ChartEditor({ element, onEdit }) {
     const ro = new ResizeObserver(measure);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [boxW, boxH]);
+  }, [boxH, element.geometry?.base?.w]);
 
-  const chartEl =
-    type === 'line' ? (
-      <LineChart data={data} width={chartSize.width} height={chartSize.height}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="name" />
-        <YAxis />
-        <Tooltip content={<ChartTooltip />} />
-        <Line type="monotone" dataKey="value" stroke="#6c8eff" strokeWidth={2} />
-      </LineChart>
-    ) : (
-      <BarChart data={data} width={chartSize.width} height={chartSize.height}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="name" />
-        <YAxis />
-        <Tooltip content={<ChartTooltip />} />
-        <Bar dataKey="value" fill="#6c8eff" />
-      </BarChart>
+  if (chartSize.width <= 0 || chartSize.height <= 0) {
+    return (
+      <div ref={chartWrapRef} className="h-full w-full min-h-[160px] bg-white" style={{ minHeight: boxH }} />
     );
+  }
+
+  const chartProps = { data, width: chartSize.width, height: chartSize.height };
 
   return (
-    <div className="flex h-full w-full flex-col bg-white p-2" style={{ minHeight: boxH }}>
-      <div className="mb-1 flex shrink-0 gap-1" onMouseDown={(e) => e.stopPropagation()}>
-        {['bar', 'line'].map((t) => (
-          <button
-            key={t}
-            type="button"
-            onClick={() => onEdit?.({ chartType: t })}
-            className={
-              type === t
-                ? 'rounded bg-[var(--color-accent)] px-2 py-0.5 text-[10px] capitalize text-white'
-                : 'rounded bg-black/5 px-2 py-0.5 text-[10px] capitalize'
-            }
-          >
-            {t}
-          </button>
-        ))}
-        <button
-          type="button"
-          className="ml-auto rounded bg-black/5 px-2 py-0.5 text-[10px] hover:bg-black/10"
-          onClick={() => {
-            const next = `chart-${Date.now()}`;
-            setSeed(next);
-            onEdit?.({ seed: next });
-          }}
-        >
-          New data
-        </button>
-      </div>
-      <div ref={chartWrapRef} className="min-h-[120px] w-full flex-1">
-        {chartSize.width > 0 && chartSize.height > 0 ? chartEl : null}
-      </div>
+    <div
+      ref={chartWrapRef}
+      className="h-full w-full bg-white p-2"
+      style={{ minHeight: boxH }}
+    >
+      {type === 'line' ? (
+        <LineChart {...chartProps}>
+          <CartesianGrid stroke="#e5e5e5" strokeDasharray="3 3" />
+          <XAxis dataKey="name" tick={{ fill: '#444', fontSize: 11 }} />
+          <YAxis tick={{ fill: '#444', fontSize: 11 }} />
+          <Tooltip content={<ChartTooltip />} />
+          <Line type="monotone" dataKey="value" stroke="#4f6ef7" strokeWidth={2} dot={{ fill: '#4f6ef7' }} />
+        </LineChart>
+      ) : (
+        <BarChart {...chartProps}>
+          <CartesianGrid stroke="#e5e5e5" strokeDasharray="3 3" />
+          <XAxis dataKey="name" tick={{ fill: '#444', fontSize: 11 }} />
+          <YAxis tick={{ fill: '#444', fontSize: 11 }} />
+          <Tooltip content={<ChartTooltip />} />
+          <Bar dataKey="value" fill="#4f6ef7" radius={[4, 4, 0, 0]} />
+        </BarChart>
+      )}
     </div>
   );
 }
@@ -125,19 +102,32 @@ export const chartWidget = {
   label: 'Chart',
   icon: BarChart3,
   category: 'basic',
-  defaultProps: () => ({
-    chartType: 'bar',
-    seed: 'chart-default',
-  }),
+  defaultProps: () => {
+    const seed = 'chart-default';
+    return {
+      chartType: 'bar',
+      seed,
+      chartData: generateChartData(seed),
+    };
+  },
   defaultGeometry: () => ({ base: { x: 24, y: 120, w: 360, h: 220 } }),
   schema: {
     chartType: {
       kind: 'select',
       label: 'Chart type',
       options: [
-        { value: 'bar', label: 'Bar' },
-        { value: 'line', label: 'Line' },
+        { value: 'bar', label: 'Bar chart' },
+        { value: 'line', label: 'Line chart' },
       ],
+    },
+    chartData: {
+      kind: 'chartData',
+      label: 'Values (Jan–May)',
+    },
+    newData: {
+      kind: 'action',
+      label: 'Random data',
+      buttonLabel: 'New data',
     },
   },
   Editor: ChartEditor,

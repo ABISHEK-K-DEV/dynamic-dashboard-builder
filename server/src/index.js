@@ -3,7 +3,6 @@ const cors = require('cors');
 const db = require('./config/db');
 require('./models');
 const dashboardRoutes = require('./routes/dashboardRoutes');
-const { UPLOADS_DIR, ensureUploadsDir } = require('./config/uploads');
 const { getCorsOptions } = require('./config/cors');
 const { ensureDefaultDashboard } = require('./utils/bootstrap');
 const { runMigrations } = require('./utils/migrations');
@@ -17,12 +16,8 @@ if (isProduction) {
   app.set('trust proxy', 1);
 }
 
-ensureUploadsDir();
-
 app.use(cors(getCorsOptions()));
 app.use(express.json({ limit: '2mb' }));
-
-app.use('/uploads', express.static(UPLOADS_DIR));
 app.use('/api', dashboardRoutes);
 
 app.get('/health', (req, res) => {

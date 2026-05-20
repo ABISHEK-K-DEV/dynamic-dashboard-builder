@@ -4,7 +4,7 @@ A drag-and-drop dashboard/page builder inspired by Figma, Canva, and Webflow edi
 
 ## Tech Stack
 
-- **Frontend:** React, Vite, Tailwind CSS, React Grid Layout, React Quill, Recharts
+- **Frontend:** React, Vite, Tailwind CSS, Recharts, react-moveable, @dnd-kit
 - **Backend:** Node.js, Express, MySQL, Sequelize
 
 See **[ASSIGNMENT.md](./ASSIGNMENT.md)** for requirement mapping and demo steps.
@@ -13,7 +13,7 @@ See **[ASSIGNMENT.md](./ASSIGNMENT.md)** for requirement mapping and demo steps.
 
 - Drag, resize, and arrange widgets (text, image, charts)
 - Rich text editing (bold, italic, font size)
-- Image upload and chart widgets (bar / line / pie)
+- Image assets (base64 in project JSON) and chart widgets (bar / line)
 - Save and restore layouts from MySQL
 
 ## Local setup

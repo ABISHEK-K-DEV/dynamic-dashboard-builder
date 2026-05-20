@@ -1,5 +1,6 @@
 import { useEditorStore } from '@/store/editorStore';
 import { widgetRegistry } from '@/widgets/registry';
+import { generateChartData } from '@/widgets/chart';
 import { SchemaForm } from '@/inspector/SchemaForm';
 import { LayoutPanel } from './LayoutPanel';
 
@@ -35,6 +36,11 @@ export function RightInspector() {
   }
 
   const onChange = (key, value) => {
+    if (key === 'newData') {
+      const seed = `chart-${Date.now()}`;
+      updateElement(id, { seed, chartData: generateChartData(seed) });
+      return;
+    }
     const topKey = key.split('.')[0];
     updateElement(id, { [topKey]: value });
   };

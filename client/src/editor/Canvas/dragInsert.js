@@ -15,16 +15,7 @@ function pointerToArtboard(clientX, clientY) {
   return { x, y };
 }
 function widgetKindForAsset(assetKind) {
-  switch (assetKind) {
-    case 'image':
-      return 'image';
-    case 'svg':
-      return 'svg';
-    case 'video':
-      return 'video';
-    case 'font':
-      return null;
-  }
+  return assetKind === 'image' ? 'image' : null;
 }
 function handleSidebarDrop(e) {
   const data = e.active.data.current;
