@@ -7,16 +7,18 @@ export function App() {
   const [view, setView] = useState('projects');
   const setSelection = useEditorStore((s) => s.setSelection);
 
-  if (view === 'projects') {
-    return (
-      <ProjectsList
-        onOpened={() => {
-          setSelection([]);
-          setView('editor');
-        }}
-      />
-    );
-  }
-
-  return <EditorShell onBackToProjects={() => setView('projects')} />;
+  return (
+    <>
+      {view === 'projects' ? (
+        <ProjectsList
+          onOpened={() => {
+            setSelection([]);
+            setView('editor');
+          }}
+        />
+      ) : (
+        <EditorShell onBackToProjects={() => setView('projects')} />
+      )}
+    </>
+  );
 }

@@ -4,6 +4,7 @@ import { useDraggable } from '@dnd-kit/core';
 import { useEditorStore } from '@/store/editorStore';
 import { useAssetUrl } from '@/lib/assetUrls';
 import { uid } from '@/lib/id';
+import { toast } from '@/store/toastStore';
 
 function readDataUrl(file) {
   return new Promise((resolve, reject) => {
@@ -54,8 +55,12 @@ export function AssetsPanel() {
     if (!files?.length) return;
     setUploading(true);
     try {
+      let skipped = 0;
       for (const file of Array.from(files)) {
-        if (!file.type.startsWith('image/')) continue;
+        if (!file.type.startsWith('image/')) {
+          skipped += 1;
+          continue;
+        }
         const dataUrl = await readDataUrl(file);
         addAsset({
           id: uid('asset'),
@@ -65,6 +70,9 @@ export function AssetsPanel() {
           size: file.size,
           dataUrl,
         });
+      }
+      if (skipped > 0) {
+        toast.info('Only image files were added');
       }
     } finally {
       setUploading(false);

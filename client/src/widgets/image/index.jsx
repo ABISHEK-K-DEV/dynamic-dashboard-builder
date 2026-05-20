@@ -3,6 +3,7 @@ import { Image as ImageIcon, Upload } from 'lucide-react';
 import { useEditorStore } from '@/store/editorStore';
 import { useAssetUrl } from '@/lib/assetUrls';
 import { uid } from '@/lib/id';
+import { toast } from '@/store/toastStore';
 
 function readDataUrl(file) {
   return new Promise((resolve, reject) => {
@@ -21,7 +22,11 @@ function ImageEditor({ element, onEdit }) {
 
   const onUpload = async (files) => {
     const file = files?.[0];
-    if (!file?.type.startsWith('image/')) return;
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast.info('Please choose an image file');
+      return;
+    }
     const dataUrl = await readDataUrl(file);
     const asset = {
       id: uid('asset'),

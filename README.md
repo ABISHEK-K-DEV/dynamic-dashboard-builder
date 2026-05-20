@@ -1,75 +1,87 @@
 # Dynamic Dashboard Builder
 
-A drag-and-drop dashboard/page builder inspired by Figma, Canva, and Webflow editors.
+Drag-and-drop dashboard editor (text, image, bar/line charts). Layouts save to **MySQL**.
 
-## Tech Stack
+---
 
-- **Frontend:** React, Vite, Tailwind CSS, Recharts, react-moveable, @dnd-kit
-- **Backend:** Node.js, Express, MySQL, Sequelize
+## Deliverables (this repo)
 
-See **[ASSIGNMENT.md](./ASSIGNMENT.md)** for requirement mapping and demo steps.
+| # | What | Where |
+|---|------|--------|
+| 1 | **Working prototype** (dummy chart data, drag/resize) | Run with `npm start` → http://localhost:5173 |
+| 2 | **SQL schema + sample data** | [`schema.sql`](./schema.sql) |
+| 3 | **Setup instructions** | This file |
 
-## Features
+---
 
-- Drag, resize, and arrange widgets (text, image, charts)
-- Rich text editing (bold, italic, font size)
-- Image assets (base64 in project JSON) and chart widgets (bar / line)
-- Save and restore layouts from MySQL
+## Setup (5 steps)
 
-## Local setup
+**Need:** Node.js 18+, MySQL
 
-1. **Install dependencies**
+```bash
+# 1. Install
+npm run install:all
 
-   ```bash
-   npm run install:all
-   ```
+# 2. Database (creates tables + sample row)
+mysql -u root -p < schema.sql
 
-   Dependencies are installed only in `client/` and `server/` (no root `node_modules`).
+# 3. Config
+cp server/.env.example server/.env
+cp client/.env.example client/.env
+```
 
-2. **Database**
+Edit **`server/.env`** — MySQL user/password (`DB_HOST`, `DB_USER`, `DB_PASS`, `DB_NAME=dynamic_dashboard`).
 
-   ```bash
-   mysql -u root -p < schema.sql
-   ```
+Edit **`client/.env`** — local API:
 
-3. **Environment**
+```env
+VITE_API_BASE_URL=http://localhost:5000
+```
 
-   ```bash
-   cp server/.env.example server/.env
-   cp client/.env.example client/.env
-   ```
+```bash
+# 4. Run (client + server)
+npm start
+```
 
-   Edit `server/.env` with your MySQL credentials.
+| URL | |
+|-----|--|
+| http://localhost:5173 | Builder UI |
+| http://localhost:5000 | API |
 
-4. **Run**
+---
 
-   ```bash
-   npm start
-   ```
+## Use the prototype
 
-   - Frontend: http://localhost:5173  
-   - API: http://localhost:5000  
+1. **New dashboard** — blank canvas.  
+2. Left: drag **Text**, **Image**, **Chart**; **Sections** to add/move/resize sections.  
+3. Right panel: bold, italic, font size, chart type, **New data** (random dummy values).  
+4. **Save** — stores layout in MySQL.  
+5. **Load** — pick a dashboard from the list and restore it.
 
-## Deployment (Vercel + Railway / Render)
+Charts use **Recharts** with generated dummy data (assignment allows Chart.js-style libraries).
 
-| Service | Platform |
-|---------|----------|
-| React app | **Vercel** |
-| Express API + MySQL | **Railway** or **Render** |
+---
 
-Full step-by-step instructions: **[DEPLOYMENT.md](./DEPLOYMENT.md)**
+## SQL (`schema.sql`)
 
-**Production env (minimum):**
+**Tables**
 
-- **Vercel:** `VITE_API_BASE_URL=https://your-api.example.com`
-- **Railway/Render API:** `DATABASE_URL`, `CORS_ORIGINS=https://your-app.vercel.app`, `NODE_ENV=production`
+- `dashboards` — saved projects (`project_data` = full JSON layout)
+- `widgets`, `widget_positions`, `widget_styles` — per-widget rows (synced on Save)
 
-## Project structure
+**Sample data**
+
+- Dashboard `d1` — `Sample Dashboard`
+- Optional demo text widget `demo-w1` (see bottom of `schema.sql`)
+
+---
+
+## Project folders
 
 ```
-client/          React frontend (deploy to Vercel)
-server/          Express API (deploy to Railway or Render)
-schema.sql       MySQL schema + seed data
-render.yaml      Render blueprint
-vercel.json      Vercel build config (monorepo root)
+client/     React UI
+server/     Express API
+schema.sql  MySQL DDL + inserts
 ```
+
+**Tech:** React, Vite, Recharts, react-moveable, Express, Sequelize, MySQL

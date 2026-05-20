@@ -63,6 +63,7 @@ const initialState = {
   mode: 'edit',
   clipboard: [],
   grid: { enabled: false, size: 8 },
+  cloudDashboardId: null,
 };
 const useEditorStore = create()(
   temporal(
@@ -113,6 +114,11 @@ const useEditorStore = create()(
           s.activePageId = page.id;
           s.selection = [];
           s.hover = null;
+          s.cloudDashboardId = null;
+        }),
+      setCloudDashboardId: (id) =>
+        set((s) => {
+          s.cloudDashboardId = id;
         }),
       renameProject: (name) =>
         set((s) => {

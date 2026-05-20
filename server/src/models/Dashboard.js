@@ -3,8 +3,7 @@ const sequelize = require('../config/db');
 
 const Dashboard = sequelize.define('Dashboard', {
   id: {
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
+    type: DataTypes.STRING(36),
     primaryKey: true,
   },
   name: {
